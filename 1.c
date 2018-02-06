@@ -11,23 +11,39 @@
 #include "ping.h"
 #include "basicmove.h"
 
+struct IntLeftRight {
+    int left;
+    int right;
+};
+
 struct Log {
-    int ticksL;
-    int ticksR;
-    int speedL;
-    int speedR;
+    struct IntLeftRight ticks;
+    struct IntLeftRight speed;
 };
 
 
 int main() {
-    Log logs[199];
-    int logCounter = 0, preLeftTicks = 0, preRightTicks = 0, preLeftSpeed = 64, preRightSpeed = 64;
+    struct Log logs[199];
+    struct IntLeftRight preTicks = {
+            .left = 0,
+            .right = 0
+    };
+    struct IntLeftRight preSpeed = {
+            .left = 64,
+            .right = 64
+    };
+    int logCounter = 0;
+
     int preLeftDis = 0;
     int newLeftDis = leftDis();
-    drive_speed(preLeftSpeed, preRightSpeed);
+    drive_speed(preSpeed.left, preSpeed.right);
     while (ping_cm(8) > 12) {
         int needRecord = 0;
-        int newLS = 0, newRS = 0;
+        struct IntLeftRight newSpeed = {
+                .left = 0,
+                .right = 0
+        };
+
 
         preLeftDis = newLeftDis;
         newLeftDis = leftDis();
@@ -35,47 +51,49 @@ int main() {
         int leftDisChange = newLeftDis - preLeftDis;
 
         if (leftDisChange > 10) {
-            newLS = 16;
-            newRS = 64;
+            newSpeed.left = 16;
+            newSpeed.right = 64;
         } else if (leftDisChange > 5) {
-            newLS = 24;
-            newRS = 64;
+            newSpeed.left = 24;
+            newSpeed.right = 64;
         } else if (leftDisChange > 3) {
-            newLS = 32;
-            newRS = 64;
+            newSpeed.left = 32;
+            newSpeed.right = 64;
         } else if (leftDisChange > 0) {
-            newLS = 48;
-            newRS = 64;
+            newSpeed.left = 48;
+            newSpeed.right = 64;
         } else if (leftDisChange == 0) {
-            newLS = 64;
-            newRS = 64;
+            newSpeed.left = 64;
+            newSpeed.right = 64;
         } else if (leftDisChange > -3) {
-            newLS = 64;
-            newRS = 48;
+            newSpeed.left = 64;
+            newSpeed.right = 48;
         } else if (leftDisChange > -6) {
-            newLS = 64;
-            newRS = 32;
+            newSpeed.left = 64;
+            newSpeed.right = 32;
         } else if (leftDisChange > -11) {
-            newLS = 64;
-            newRS = 24;
+            newSpeed.left = 64;
+            newSpeed.right = 24;
         } else {
-            newLS = 64;
-            newRS = 16;
+            newSpeed.left = 64;
+            newSpeed.right = 16;
         }
 
-        if (preLeftSpeed != newLS || preRightSpeed != newRS) { // need to update speed and record
-            preLeftSpeed = newLS;
-            preRightSpeed = newRS;
-            drive_speed(preLeftSpeed, preRightSpeed);
-            logs[logCounter].speedL = preLeftSpeed;
-            logs[logCounter].speedR = preRightSpeed;
-            drive_getTicks(&logs.ticksL[logCounter], &logs.ticksR[logCounter]);
+        if (preSpeed.left != newSpeed.left || preSpeed.right != newSpeed.right) { // need to update speed and record
+            preSpeed.left = newSpeed.left;
+            preSpeed.right = newSpeed.right;
+            drive_speed(preSpeed.left, preSpeed.right);
+            // log speed
+            logs[logCounter].speed.left = preSpeed.left;
+            logs[logCounter].speed.right = preSpeed.right;
+
+            drive_getTicks(&logs[logCounter].ticks.left, &logs[logCounter].ticks.right);
             // calculate the difference in ticks
-            logs.ticksL[logCounter] = logs.ticksL[logCounter] - preLeftTicks;
-            logs.ticksR[logCounter] = logs.ticksR[logCounter] - preRightTicks;
+            logs[logCounter].ticks.left = logs[logCounter].ticks.left - preTicks.left;
+            logs[logCounter].ticks.right = logs[logCounter].ticks.right - preTicks.right;
             // update pre-ticks
-            preLeftTicks = preLeftTicks + logs.ticksL[logCounter];
-            preRightTicks = preRightTicks + logs.ticksR[logCounter];
+            preTicks.left = preTicks.left + logs[logCounter].ticks.left;
+            preTicks.right = preTicks.right + logs[logCounter].ticks.right;
             logCounter++;
         }
 
@@ -89,17 +107,17 @@ int main() {
     double BOT_WIDTH = 32.5538;
 
     for (int i = 0; i < logCounter; i++) {
-        double currentD = (logs.ticksL[i] - logs.ticksR[i]) / BOT_WIDTH;
+        double currentD = (logs[i].ticks.left - logs[i].ticks.right) / BOT_WIDTH;
         theta = theta + currentD;
         if (theta != 0) {
-            double rl = logs.ticksL[i] / theta;
-            double rr = logs.ticksR[i] / theta;
+            double rl = logs[i].ticks.left / theta;
+            double rr = logs[i].ticks.right / theta;
             double rm = (rl + rr) / 2.0;
             x = x + rm - rm * cos(theta);
             y = y + rm * sin(theta);
         } else {
-            x = x + logs.ticksL[i];
-            y = y + logs.ticksR[i];
+            x = x + logs[i].ticks.left;
+            y = y + logs[i].ticks.right;
         }
 
     }
@@ -114,7 +132,9 @@ int main() {
     pause(200);
 
     // go back
-
+//    for (int i = counter - 1; i >= 0; i--) {
+//
+//    }
 
     return 0;
 }
