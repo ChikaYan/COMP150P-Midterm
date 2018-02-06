@@ -11,6 +11,7 @@
 #include "ping.h"
 #include "basicmove.h"
 
+// structures
 struct IntLeftRight {
     int left;
     int right;
@@ -21,33 +22,49 @@ struct Log {
     struct IntLeftRight speed;
 };
 
+// global variables
+struct Log logs[199];
+struct IntLeftRight preTicks = {
+        .left = 0,
+        .right = 0
+};
+struct IntLeftRight preSpeed = {
+        .left = 64,
+        .right = 64
+};
+struct IntLeftRight newSpeed;
+int logCounter = 0;
+
+
+void updateLog() {
+// log speed
+    logs[logCounter].speed.left = preSpeed.left;
+    logs[logCounter].speed.right = preSpeed.right;
+
+    preSpeed.left = newSpeed.left;
+    preSpeed.right = newSpeed.right;
+    drive_speed(preSpeed.left, preSpeed.right);
+
+    drive_getTicks(&logs[logCounter].ticks.left, &logs[logCounter].ticks.right);
+    // calculate the difference in ticks
+    logs[logCounter].ticks.left = logs[logCounter].ticks.left - preTicks.left;
+    logs[logCounter].ticks.right = logs[logCounter].ticks.right - preTicks.right;
+    // update pre-ticks
+    preTicks.left = preTicks.left + logs[logCounter].ticks.left;
+    preTicks.right = preTicks.right + logs[logCounter].ticks.right;
+    logCounter++;
+}
 
 int main() {
-    struct Log logs[199];
-    struct IntLeftRight preTicks = {
-            .left = 0,
-            .right = 0
-    };
-    struct IntLeftRight preSpeed = {
-            .left = 64,
-            .right = 64
-    };
-    int logCounter = 0;
-
     int preLeftDis = 0;
     int newLeftDis = leftDis();
+
     drive_speed(preSpeed.left, preSpeed.right);
-    while (ping_cm(8) > 12) {
+
+    while (ping_cm(8) > 20) {
         int needRecord = 0;
-        struct IntLeftRight newSpeed = {
-                .left = 0,
-                .right = 0
-        };
-
-
         preLeftDis = newLeftDis;
         newLeftDis = leftDis();
-
         int leftDisChange = newLeftDis - preLeftDis;
 
         if (leftDisChange > 10) {
@@ -80,25 +97,15 @@ int main() {
         }
 
         if (preSpeed.left != newSpeed.left || preSpeed.right != newSpeed.right) { // need to update speed and record
-            preSpeed.left = newSpeed.left;
-            preSpeed.right = newSpeed.right;
-            drive_speed(preSpeed.left, preSpeed.right);
-            // log speed
-            logs[logCounter].speed.left = preSpeed.left;
-            logs[logCounter].speed.right = preSpeed.right;
-
-            drive_getTicks(&logs[logCounter].ticks.left, &logs[logCounter].ticks.right);
-            // calculate the difference in ticks
-            logs[logCounter].ticks.left = logs[logCounter].ticks.left - preTicks.left;
-            logs[logCounter].ticks.right = logs[logCounter].ticks.right - preTicks.right;
-            // update pre-ticks
-            preTicks.left = preTicks.left + logs[logCounter].ticks.left;
-            preTicks.right = preTicks.right + logs[logCounter].ticks.right;
-            logCounter++;
+            updateLog();
         }
-
         pause(50);
     }
+    // stop and pause to ensure that bot has fully stopped
+    drive_speed(0, 0);
+
+    pause(1000);
+    updateLog();
 
     // calculate position
     double x = 0.0;
@@ -107,8 +114,8 @@ int main() {
     double BOT_WIDTH = 32.5538;
 
     for (int i = 0; i < logCounter; i++) {
-        double currentD = (logs[i].ticks.left - logs[i].ticks.right) / BOT_WIDTH;
-        theta = theta + currentD;
+        double currentDegree = (logs[i].ticks.left - logs[i].ticks.right) / BOT_WIDTH;
+        theta = theta + currentDegree;
         if (theta != 0) {
             double rl = logs[i].ticks.left / theta;
             double rr = logs[i].ticks.right / theta;
@@ -126,15 +133,31 @@ int main() {
     double distance = sqrt(x * x + y * y);
     printf("Degree: %f radius, Distance: %f cm\n", theta, distance);
 
-    // Stop, turn and pause
-    drive_speed(0, 0);
+
     drive_goto(51, -51);
-    pause(200);
+    pause(2000);
 
     // go back
-//    for (int i = counter - 1; i >= 0; i--) {
-//
-//    }
+    struct IntLeftRight newTicks;
+    // update history ticks
+    logCounter--;
+    drive_getTicks(&preTicks.left, &preTicks.right);
+    // when going back, left and right need to be reversed
+    drive_speed(logs[logCounter].speed.right, logs[logCounter].speed.left);
+    while (1) {
+        drive_getTicks(&newTicks.left, &newTicks.right);
+        if (newTicks.left - preTicks.left > logs[logCounter].ticks.right &&
+            newTicks.right - preTicks.right > logs[logCounter].ticks.left) {
+            // ticks recoded in log have been traveled
+            if (logCounter == 0) {
+                break;
+            }
+            logCounter--;
+            drive_getTicks(&preTicks.left, &preTicks.right);
+            drive_speed(logs[logCounter].speed.right, logs[logCounter].speed.left);
+        }
+    }
+    drive_speed(0, 0);
 
     return 0;
 }
