@@ -31,11 +31,22 @@ void turn(float a) {
 
 int leftDis() {
     int init = 0;
-    for (int dacVal = 0; dacVal < 160; dacVal += 4)  // <- add
-    {                                               // <- add
-        dac_ctr(26, 0, dacVal);                       // <- add
-        freqout(11, 1, 38000);                        // <- add
+    for (int dacVal = 0; dacVal < 160; dacVal += 4)
+    {
+        dac_ctr(26, 0, dacVal);
+        freqout(11, 1, 38000);
         init += input(10);
+    }
+    return init;
+}
+
+int RightDis(){
+  int init = 0;
+  for(int dacVal = 0; dacVal < 160; dacVal += 4)
+    {
+      dac_ctr(27, 1, dacVal);
+      freqout(1, 1, 38000);
+      init += input(10);
     }
     return init;
 }
