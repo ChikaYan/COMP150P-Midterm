@@ -52,6 +52,10 @@ void updateLog() {
     // update pre-ticks
     preTicks.left = preTicks.left + logs[logCounter].ticks.left;
     preTicks.right = preTicks.right + logs[logCounter].ticks.right;
+
+    printf("Travelled for (%d, %d) in speed (%d, %d)\n\n", logs[logCounter].ticks.left, logs[logCounter].ticks.right,
+           logs[logCounter].speed.left, logs[logCounter].speed.right);
+
     logCounter++;
 }
 
@@ -66,6 +70,8 @@ int main() {
         preLeftDis = newLeftDis;
         newLeftDis = leftDis();
         int leftDisChange = newLeftDis - preLeftDis;
+
+        printf("Change in left distance is: %d\n", leftDisChange);
 
         if (leftDisChange > 10) {
             newSpeed.left = 16;
@@ -98,6 +104,7 @@ int main() {
 
         if (preSpeed.left != newSpeed.left || preSpeed.right != newSpeed.right) { // need to update speed and record
             updateLog();
+
         }
         pause(50);
     }
