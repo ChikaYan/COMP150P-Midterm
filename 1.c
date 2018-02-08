@@ -32,7 +32,10 @@ struct IntLeftRight preSpeed = {
         .left = 64,
         .right = 64
 };
-struct IntLeftRight newSpeed;
+struct IntLeftRight newSpeed = {
+        .left = 64,
+        .right = 64
+};
 int logCounter = 0;
 
 
@@ -82,15 +85,9 @@ int main() {
         } else if (leftDisChange > 3) {
             newSpeed.left = 32;
             newSpeed.right = 64;
-        } else if (leftDisChange > 0) {
-            newSpeed.left = 48;
-            newSpeed.right = 64;
-        } else if (leftDisChange == 0) {
-            newSpeed.left = 64;
-            newSpeed.right = 64;
         } else if (leftDisChange > -3) {
             newSpeed.left = 64;
-            newSpeed.right = 48;
+            newSpeed.right = 64;
         } else if (leftDisChange > -6) {
             newSpeed.left = 64;
             newSpeed.right = 32;
@@ -102,9 +99,10 @@ int main() {
             newSpeed.right = 16;
         }
 
+        printf("new speed is: (%d, %d)\n", newSpeed.left, newSpeed.right);
+
         if (preSpeed.left != newSpeed.left || preSpeed.right != newSpeed.right) { // need to update speed and record
             updateLog();
-
         }
         pause(50);
     }
