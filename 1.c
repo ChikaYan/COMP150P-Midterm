@@ -159,7 +159,11 @@ int main() {
             }
             logCounter--;
             drive_getTicks(&preTicks.left, &preTicks.right);
+            if (preTicks.left == preTicks.right) {
+                drive_speed(64, 64);
+            }else{
             drive_speed(logs[logCounter].speed.right, logs[logCounter].speed.left);
+            }
         }
     }
     drive_speed(0, 0);
