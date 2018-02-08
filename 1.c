@@ -143,27 +143,43 @@ int main() {
     pause(2000);
 
     // go back
+    printf("********HEADING BACK********");
     struct IntLeftRight newTicks;
     // update history ticks
     logCounter--;
     drive_getTicks(&preTicks.left, &preTicks.right);
     // when going back, left and right need to be reversed
-    drive_speed(logs[logCounter].speed.right, logs[logCounter].speed.left);
+    if (logs[logCounter].ticks.left == logs[logCounter].ticks.right) {
+        drive_speed(64, 64);
+        preSpeed.right = 64;
+        preSpeed.left = 64;
+    } else {
+        preSpeed.right = logs[logCounter].speed.right;
+        preSpeed.left = logs[logCounter].speed.left;
+    }
+    drive_speed(preSpeed.left, preSpeed.right);
     while (1) {
         drive_getTicks(&newTicks.left, &newTicks.right);
-        if (newTicks.left - preTicks.left > logs[logCounter].ticks.right &&
-            newTicks.right - preTicks.right > logs[logCounter].ticks.left) {
-            // ticks recoded in log have been traveled
+        if (newTicks.left - preTicks.left >= logs[logCounter].ticks.right &&
+            newTicks.right - preTicks.right >= logs[logCounter].ticks.left) {
+            // ticks recorded in log have been traveled
+            printf("Travelled for (%d, %d) in speed (%d, %d)\n\n", newTicks.left - preTicks.left,
+                   newTicks.right - preTicks.right,
+                   preSpeed.left, preSpeed.right);
             if (logCounter == 0) {
                 break;
             }
             logCounter--;
             drive_getTicks(&preTicks.left, &preTicks.right);
-            if (preTicks.left == preTicks.right) {
+            if (logs[logCounter].ticks.left == logs[logCounter].ticks.right) {
                 drive_speed(64, 64);
-            }else{
-            drive_speed(logs[logCounter].speed.right, logs[logCounter].speed.left);
+                preSpeed.right = 64;
+                preSpeed.left = 64;
+            } else {
+                preSpeed.right = logs[logCounter].speed.right;
+                preSpeed.left = logs[logCounter].speed.left;
             }
+            drive_speed(preSpeed.left, preSpeed.right);
         }
     }
     drive_speed(0, 0);
