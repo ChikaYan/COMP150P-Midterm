@@ -51,5 +51,4 @@ int RightDis(){
     return init;
 }
 
-
 #endif //PROJECT_BASICMOVE_H
