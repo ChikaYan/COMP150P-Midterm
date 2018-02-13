@@ -40,13 +40,13 @@ int leftDis() {
     return init;
 }
 
-int RightDis(){
-  int init = 0;
-  for(int dacVal = 0; dacVal < 160; dacVal += 4)
+int rightDis(){
+    int init = 0;
+    for (int dacVal = 0; dacVal < 160; dacVal += 4)
     {
-      dac_ctr(27, 1, dacVal);
-      freqout(1, 1, 38000);
-      init += input(10);
+        dac_ctr(27, 1, dacVal);
+        freqout(1, 1, 38000);
+        init += input(2);
     }
     return init;
 }
