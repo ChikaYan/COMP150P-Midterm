@@ -62,11 +62,11 @@ void updateLog() {
     logCounter++;
 }
 
-void P_controller(int leftDisChange,int rightDisChange, int initial_speed, float P_value, int tolerance){
-    if (leftDisChange - rightDisChange > tolerance){
+void P_controller(int leftDisChange, int rightDisChange, int initial_speed, float P_value, int tolerance) {
+    if (leftDisChange - rightDisChange > tolerance) {
         newSpeed.left = round(initial_speed * (leftDisChange - rightDisChange) * P_value);
         newSpeed.right = initial_speed;
-    } else if (rightDisChange - leftDisChange > tolerance){
+    } else if (rightDisChange - leftDisChange > tolerance) {
         newSpeed.left = initial_speed;
         newSpeed.right = round(initial_speed * (rightDisChange - leftDisChange) * P_value);
     } else {
@@ -74,65 +74,6 @@ void P_controller(int leftDisChange,int rightDisChange, int initial_speed, float
         newSpeed.right = initial_speed;
     }
 }
-
-//void decide_by_left(int leftDisChange){
-//    if (leftDisChange > 10) {
-//        newSpeed.left = 16;
-//        newSpeed.right = 64;
-//    } else if (leftDisChange > 7){
-//        newSpeed.left = 24;
-//        newSpeed.right = 64;
-//    } else if (leftDisChange > 5) {
-//        newSpeed.left = 32;
-//        newSpeed.right = 64;
-//    } else if (leftDisChange > 3) {
-//        newSpeed.left = 40;
-//        newSpeed.right = 64;
-//    } else if (leftDisChange > 0) {  // change precision
-//        newSpeed.left = 64;
-//        newSpeed.right = 64;
-//    } else if (leftDisChange > -3) {
-//        newSpeed.left = 64;
-//        newSpeed.right = 40;
-//    } else if (leftDisChange > -5) {
-//        newSpeed.left = 64;
-//        newSpeed.right = 32;
-//    } else if (leftDisChange > -7) {
-//        newSpeed.left = 64;
-//        newSpeed.right = 24;
-//    } else if (leftDisChange > -10) {
-//        newSpeed.left = 64;
-//        newSpeed.right = 16;
-//    } else {
-//        newSpeed.left = 64;
-//        newSpeed.right = 8;
-//    }
-//}
-//
-//void decide_by_right(int rightDisChange){
-//    if (rightDisChange > 10) {
-//        newSpeed.left = 64;
-//        newSpeed.right = 16;
-//    } else if (rightDisChange > 5) {
-//        newSpeed.left = 64;
-//        newSpeed.right = 24;
-//    } else if (rightDisChange > 3) {
-//        newSpeed.left = 64;
-//        newSpeed.right = 32;
-//    } else if (rightDisChange > -3) {
-//        newSpeed.left = 64;
-//        newSpeed.right = 64;
-//    } else if (rightDisChange > -6) {
-//        newSpeed.left = 32;
-//        newSpeed.right = 64;
-//    } else if (rightDisChange > -11) {
-//        newSpeed.left = 24;
-//        newSpeed.right = 64;
-//    } else {
-//        newSpeed.left = 16;
-//        newSpeed.right = 64;
-//    }
-//}
 
 
 int main() {
@@ -152,30 +93,13 @@ int main() {
         int leftDisChange = newLeftDis - preLeftDis;
         int rightDisChange = newRightDis - preRightDis;
 
-        printf("Change in left distance is: %d\n", leftDisChange);
-        printf("Change in right distance is: %d\n", rightDisChange);
+//        printf("Change in left distance is: %d\n", leftDisChange);
+//        printf("Change in right distance is: %d\n", rightDisChange);
 
 
         P_controller(leftDisChange, rightDisChange, 64, 0.025, 1);
 
-
-//        if (newRightDis - newLeftDis > 15){
-//            P_controller(leftDisChange, rightDisChange, 64, 0.02, 0);
-//            printf(" ");
-//            printf(" ");
-//            printf("=============");
-//        } else if (newLeftDis - newRightDis > 15){
-//            P_controller(rightDisChange, leftDisChange, 64, 0.02, 0);
-//            printf(" ");
-//            printf(" ");
-//            printf("=============");
-//        } else {
-//            P_controller(leftDisChange, rightDisChange, 64, 0.08, 1);
-//        }
-
-
-
-        printf("new speed is: (%d, %d)\n", newSpeed.left, newSpeed.right);
+        //printf("new speed is: (%d, %d)\n", newSpeed.left, newSpeed.right);
 
         if (preSpeed.left != newSpeed.left || preSpeed.right != newSpeed.right) { // need to update speed and record
             updateLog();
@@ -214,6 +138,7 @@ int main() {
     double distance = sqrt(x * x + y * y);
     printf("Degree: %f radius, Distance: %f cm\n", theta, distance);
 
+    // turning
 
     drive_goto(51, -51);
     pause(2000);
