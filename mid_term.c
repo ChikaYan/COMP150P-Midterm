@@ -45,10 +45,10 @@ struct IntLeftRight newSpeed = {
 };
 const int INIT_SPEED = 64;
 
-const int THRESHOLD = 3;
-const float KP = 8;
+const float THRESHOLD = 1.5;
+const float KP = 6;
 const float KI = 4;
-const float KD = 2;
+const float KD = 3;
 float integral = 0;
 float derivative = 0;
 float lastError = 0;
@@ -71,8 +71,8 @@ void updateLog() {
     preTicks.left = preTicks.left + logs[logCounter].ticks.left;
     preTicks.right = preTicks.right + logs[logCounter].ticks.right;
 
-//    printf("Travelled for (%d, %d) in speed (%d, %d)\n\n", logs[logCounter].ticks.left, logs[logCounter].ticks.right,
-//           logs[logCounter].speed.left, logs[logCounter].speed.right);
+    printf("Travelled for (%d, %d) in speed (%d, %d)\n\n", logs[logCounter].ticks.left, logs[logCounter].ticks.right,
+           logs[logCounter].speed.left, logs[logCounter].speed.right);
 
     logCounter++;
 }
@@ -99,7 +99,7 @@ int pidController(float disChange) {
     }
     derivative = error - lastError;
     lastError = error;
-    //printf("ERROR: %d, INTEGRAL: %d, DERIVATIVE: %d\n", error, integral, derivative);
+    printf("ERROR: %f, INTEGRAL: %f, DERIVATIVE: %f\n", error, integral, derivative);
     return round(error * KP + integral * KI + derivative * KD);
 }
 
@@ -125,7 +125,6 @@ int main() {
     float newRightDis = rightDis();
 
     drive_speed(preSpeed.left, preSpeed.right);
-    pidController(leftDis() - newLeftDis);
     while (ping_cm(8) > 20) {
         preLeftDis = newLeftDis;
         preRightDis = newRightDis;
@@ -137,11 +136,10 @@ int main() {
 
 //        printf("Change in left distance is: %d\n", leftDisChange);
 //        printf("Change in right distance is: %d\n", rightDisChange);
-        printf("Left distance change is: %f\n", leftDisChange);
         //P_controller(leftDisChange, rightDisChange, 64, 0.025, 1);
 
         int pidValue = pidController(leftDisChange);
-        //printf("Change in left distance is: %d\nPID value is: %d\n", leftDisChange, pidValue);
+        printf("Change in left distance is: %d\nPID value is: %d\n", leftDisChange, pidValue);
         if (pidValue > 0) {
             newSpeed.left = INIT_SPEED - pidValue;
             newSpeed.right = INIT_SPEED;
@@ -227,11 +225,3 @@ int main() {
     return 0;
 }
 
-//int travelledEnough(){
-//    if (newTicks.left - preTicks.left >= logs[logCounter].ticks.right &&
-//        newTicks.right - preTicks.right >= logs[logCounter].ticks.left){
-//        return 1;
-//    }
-//
-//
-//}
