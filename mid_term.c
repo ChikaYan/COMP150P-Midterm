@@ -17,6 +17,11 @@ struct IntLeftRight {
     int right;
 };
 
+struct floatLeftRight {
+    float left;
+    float right;
+};
+
 struct Log {
     struct IntLeftRight ticks;
     struct IntLeftRight speed;
@@ -24,11 +29,11 @@ struct Log {
 
 // global variables
 struct Log logs[199];
+int logCounter = 0;
 struct IntLeftRight preTicks = {
         .left = 0,
         .right = 0
 };
-int logCounter = 0;
 
 struct IntLeftRight preSpeed = {
         .left = 64,
@@ -44,9 +49,9 @@ const int THRESHOLD = 3;
 const float KP = 8;
 const float KI = 4;
 const float KD = 2;
-int integral = 0;
-int derivative = 0;
-int lastError = 0;
+float integral = 0;
+float derivative = 0;
+float lastError = 0;
 
 
 void updateLog() {
@@ -66,8 +71,8 @@ void updateLog() {
     preTicks.left = preTicks.left + logs[logCounter].ticks.left;
     preTicks.right = preTicks.right + logs[logCounter].ticks.right;
 
-    printf("Travelled for (%d, %d) in speed (%d, %d)\n\n", logs[logCounter].ticks.left, logs[logCounter].ticks.right,
-           logs[logCounter].speed.left, logs[logCounter].speed.right);
+//    printf("Travelled for (%d, %d) in speed (%d, %d)\n\n", logs[logCounter].ticks.left, logs[logCounter].ticks.right,
+//           logs[logCounter].speed.left, logs[logCounter].speed.right);
 
     logCounter++;
 }
@@ -85,8 +90,8 @@ void P_controller(int leftDisChange, int rightDisChange, int initial_speed, floa
     }
 }
 
-int pidController(int disChange) {
-    int error = disChange - 0; // desired distance change is 0
+int pidController(float disChange) {
+    float error = disChange - 0; // desired distance change is 0
     if (abs(error) >= THRESHOLD) {
         integral = 0;
     } else {
@@ -94,27 +99,30 @@ int pidController(int disChange) {
     }
     derivative = error - lastError;
     lastError = error;
-    printf("ERROR: %d, INTEGRAL: %d, DERIVATIVE: %d\n", error, integral, derivative);
+    //printf("ERROR: %d, INTEGRAL: %d, DERIVATIVE: %d\n", error, integral, derivative);
     return round(error * KP + integral * KI + derivative * KD);
 }
 
 void takeSpeedFromLog() {
+    logCounter--;
     if (logs[logCounter].ticks.left == logs[logCounter].ticks.right) {
-        drive_speed(INIT_SPEED, INIT_SPEED);
         preSpeed.right = INIT_SPEED;
         preSpeed.left = INIT_SPEED;
+    } else if (logs[logCounter].ticks.left < logs[logCounter].ticks.right) {
+        preSpeed.right = round((float) logs[logCounter].ticks.left / (float) logs[logCounter].ticks.right * INIT_SPEED);
+        preSpeed.left = INIT_SPEED;
     } else {
-        preSpeed.right = logs[logCounter].speed.left;
-        preSpeed.left = logs[logCounter].speed.right;
+        preSpeed.right = INIT_SPEED;
+        preSpeed.left = round((float) logs[logCounter].ticks.right / (float) logs[logCounter].ticks.left * INIT_SPEED);
     }
     drive_speed(preSpeed.left, preSpeed.right);
 }
 
 int main() {
-    int preLeftDis = 0;
-    int preRightDis = 0;
-    int newLeftDis = leftDis();
-    int newRightDis = rightDis();
+    float preLeftDis = 0;
+    float preRightDis = 0;
+    float newLeftDis = leftDis();
+    float newRightDis = rightDis();
 
     drive_speed(preSpeed.left, preSpeed.right);
     pidController(leftDis() - newLeftDis);
@@ -124,15 +132,16 @@ int main() {
         newLeftDis = leftDis();
         newRightDis = rightDis();
 
-        int leftDisChange = newLeftDis - preLeftDis;
-        int rightDisChange = newRightDis - preRightDis;
+        float leftDisChange = newLeftDis - preLeftDis;
+        float rightDisChange = newRightDis - preRightDis;
 
 //        printf("Change in left distance is: %d\n", leftDisChange);
 //        printf("Change in right distance is: %d\n", rightDisChange);
-
+        printf("Left distance change is: %f\n", leftDisChange);
         //P_controller(leftDisChange, rightDisChange, 64, 0.025, 1);
+
         int pidValue = pidController(leftDisChange);
-        printf("Change in left distance is: %d\nPID value is: %d\n", leftDisChange, pidValue);
+        //printf("Change in left distance is: %d\nPID value is: %d\n", leftDisChange, pidValue);
         if (pidValue > 0) {
             newSpeed.left = INIT_SPEED - pidValue;
             newSpeed.right = INIT_SPEED;
@@ -140,15 +149,11 @@ int main() {
             newSpeed.left = INIT_SPEED;
             newSpeed.right = INIT_SPEED + pidValue;
         }
-
-
-
         //printf("new speed is: (%d, %d)\n", newSpeed.left, newSpeed.right);
-
         if (preSpeed.left != newSpeed.left || preSpeed.right != newSpeed.right) { // need to update speed and record
             updateLog();
         }
-        pause(100);
+        pause(50);
     }
     // stop and pause to ensure that bot has fully stopped
     drive_speed(0, 0);
@@ -195,13 +200,13 @@ int main() {
     printf("********HEADING BACK********\n");
     struct IntLeftRight newTicks;
     // update history ticks
-    logCounter--;
+
     drive_getTicks(&preTicks.left, &preTicks.right);
     // when going back, left and right need to be reversed
     takeSpeedFromLog();
     while (1) {
         drive_getTicks(&newTicks.left, &newTicks.right);
-        if (newTicks.left - preTicks.left >= logs[logCounter].ticks.right ||
+        if (newTicks.left - preTicks.left >= logs[logCounter].ticks.right &&
             newTicks.right - preTicks.right >= logs[logCounter].ticks.left) {
             // ticks recorded in log have been traveled
             printf("Travelled for (%d, %d) in speed (%d, %d)\nLog is: Travelled for (%d, %d) in speed (%d, %d)\n\n",
@@ -209,10 +214,10 @@ int main() {
                    newTicks.right - preTicks.right,
                    preSpeed.left, preSpeed.right, logs[logCounter].ticks.left, logs[logCounter].ticks.right,
                    logs[logCounter].speed.left, logs[logCounter].speed.right);
+
             if (logCounter == 0) {
                 break;
             }
-            logCounter--;
             drive_getTicks(&preTicks.left, &preTicks.right);
             takeSpeedFromLog();
         }
@@ -221,3 +226,12 @@ int main() {
 
     return 0;
 }
+
+//int travelledEnough(){
+//    if (newTicks.left - preTicks.left >= logs[logCounter].ticks.right &&
+//        newTicks.right - preTicks.right >= logs[logCounter].ticks.left){
+//        return 1;
+//    }
+//
+//
+//}
