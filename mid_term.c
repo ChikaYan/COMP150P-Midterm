@@ -75,6 +75,17 @@ void P_controller(int leftDisChange, int rightDisChange, int initial_speed, floa
     }
 }
 
+void takeSpeedFromLog() {
+    if (logs[logCounter].ticks.left == logs[logCounter].ticks.right) {
+        drive_speed(64, 64);
+        preSpeed.right = 64;
+        preSpeed.left = 64;
+    } else {
+        preSpeed.right = logs[logCounter].speed.left;
+        preSpeed.left = logs[logCounter].speed.right;
+    }
+    drive_speed(preSpeed.left, preSpeed.right);
+}
 
 int main() {
     int preLeftDis = 0;
@@ -139,48 +150,39 @@ int main() {
     printf("Degree: %f radius, Distance: %f cm\n", theta, distance);
 
     // turning
+    drive_goto(-2, -2);
+    if (leftDis() >= rightDis()) {
+        drive_goto(51, -51);
+    } else {
+        drive_goto(-51, 51);
+    }
 
-    drive_goto(51, -51);
     pause(2000);
 
     // go back
-    printf("********HEADING BACK********");
+    printf("********HEADING BACK********\n");
     struct IntLeftRight newTicks;
     // update history ticks
     logCounter--;
     drive_getTicks(&preTicks.left, &preTicks.right);
     // when going back, left and right need to be reversed
-    if (logs[logCounter].ticks.left == logs[logCounter].ticks.right) {
-        drive_speed(64, 64);
-        preSpeed.right = 64;
-        preSpeed.left = 64;
-    } else {
-        preSpeed.right = logs[logCounter].speed.right;
-        preSpeed.left = logs[logCounter].speed.left;
-    }
-    drive_speed(preSpeed.left, preSpeed.right);
+    takeSpeedFromLog();
     while (1) {
         drive_getTicks(&newTicks.left, &newTicks.right);
-        if (newTicks.left - preTicks.left >= logs[logCounter].ticks.right &&
+        if (newTicks.left - preTicks.left >= logs[logCounter].ticks.right ||
             newTicks.right - preTicks.right >= logs[logCounter].ticks.left) {
             // ticks recorded in log have been traveled
-            printf("Travelled for (%d, %d) in speed (%d, %d)\n\n", newTicks.left - preTicks.left,
+            printf("Travelled for (%d, %d) in speed (%d, %d)\nLog is: Travelled for (%d, %d) in speed (%d, %d)\n\n",
+                   newTicks.left - preTicks.left,
                    newTicks.right - preTicks.right,
-                   preSpeed.left, preSpeed.right);
+                   preSpeed.left, preSpeed.right, logs[logCounter].ticks.left, logs[logCounter].ticks.right,
+                   logs[logCounter].speed.left, logs[logCounter].speed.right);
             if (logCounter == 0) {
                 break;
             }
             logCounter--;
             drive_getTicks(&preTicks.left, &preTicks.right);
-            if (logs[logCounter].ticks.left == logs[logCounter].ticks.right) {
-                drive_speed(64, 64);
-                preSpeed.right = 64;
-                preSpeed.left = 64;
-            } else {
-                preSpeed.right = logs[logCounter].speed.right;
-                preSpeed.left = logs[logCounter].speed.left;
-            }
-            drive_speed(preSpeed.left, preSpeed.right);
+            takeSpeedFromLog();
         }
     }
     drive_speed(0, 0);
