@@ -28,6 +28,8 @@ struct IntLeftRight preTicks = {
         .left = 0,
         .right = 0
 };
+int logCounter = 0;
+
 struct IntLeftRight preSpeed = {
         .left = 64,
         .right = 64
@@ -36,7 +38,15 @@ struct IntLeftRight newSpeed = {
         .left = 64,
         .right = 64
 };
-int logCounter = 0;
+const int INIT_SPEED = 64;
+
+const int THRESHOLD = 3;
+const float KP = 8;
+const float KI = 4;
+const float KD = 2;
+int integral = 0;
+int derivative = 0;
+int lastError = 0;
 
 
 void updateLog() {
@@ -75,11 +85,24 @@ void P_controller(int leftDisChange, int rightDisChange, int initial_speed, floa
     }
 }
 
+int pidController(int disChange) {
+    int error = disChange - 0; // desired distance change is 0
+    if (abs(error) >= THRESHOLD) {
+        integral = 0;
+    } else {
+        integral = integral + error;
+    }
+    derivative = error - lastError;
+    lastError = error;
+    printf("ERROR: %d, INTEGRAL: %d, DERIVATIVE: %d\n", error, integral, derivative);
+    return round(error * KP + integral * KI + derivative * KD);
+}
+
 void takeSpeedFromLog() {
     if (logs[logCounter].ticks.left == logs[logCounter].ticks.right) {
-        drive_speed(64, 64);
-        preSpeed.right = 64;
-        preSpeed.left = 64;
+        drive_speed(INIT_SPEED, INIT_SPEED);
+        preSpeed.right = INIT_SPEED;
+        preSpeed.left = INIT_SPEED;
     } else {
         preSpeed.right = logs[logCounter].speed.left;
         preSpeed.left = logs[logCounter].speed.right;
@@ -94,7 +117,7 @@ int main() {
     int newRightDis = rightDis();
 
     drive_speed(preSpeed.left, preSpeed.right);
-
+    pidController(leftDis() - newLeftDis);
     while (ping_cm(8) > 20) {
         preLeftDis = newLeftDis;
         preRightDis = newRightDis;
@@ -107,19 +130,28 @@ int main() {
 //        printf("Change in left distance is: %d\n", leftDisChange);
 //        printf("Change in right distance is: %d\n", rightDisChange);
 
+        //P_controller(leftDisChange, rightDisChange, 64, 0.025, 1);
+        int pidValue = pidController(leftDisChange);
+        printf("Change in left distance is: %d\nPID value is: %d\n", leftDisChange, pidValue);
+        if (pidValue > 0) {
+            newSpeed.left = INIT_SPEED - pidValue;
+            newSpeed.right = INIT_SPEED;
+        } else {
+            newSpeed.left = INIT_SPEED;
+            newSpeed.right = INIT_SPEED + pidValue;
+        }
 
-        P_controller(leftDisChange, rightDisChange, 64, 0.025, 1);
+
 
         //printf("new speed is: (%d, %d)\n", newSpeed.left, newSpeed.right);
 
         if (preSpeed.left != newSpeed.left || preSpeed.right != newSpeed.right) { // need to update speed and record
             updateLog();
         }
-        pause(25);
+        pause(100);
     }
     // stop and pause to ensure that bot has fully stopped
     drive_speed(0, 0);
-
     pause(1000);
     updateLog();
 
