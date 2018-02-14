@@ -47,9 +47,9 @@ const int INIT_SPEED = 64;
 
 // PID parameters
 const float THRESHOLD = 1.5;
-const float KP = 6;
-const float KI = 4;
-const float KD = 3;
+const float KP = 4;
+const float KI = 2.5;
+const float KD = 1;
 struct floatLeftRight integral = {
         .left = 0,
         .right = 0
@@ -167,8 +167,8 @@ int main() {
                 .left = pidControllerLeft(disChange.left),
                 .right = pidControllerRight(disChange.right)
         };
-        printf("Change in left distance is: %d\nPID value is: %d\n", disChange.left, pidValue.left);
-        printf("Change in right distance is: %d\nPID value is: %d\n", disChange.right, pidValue.right);
+        printf("Change in left distance is: %f\nPID value is: %d\n", disChange.left, pidValue.left);
+        printf("Change in right distance is: %f\nPID value is: %d\n", disChange.right, pidValue.right);
         newSpeed.left = INIT_SPEED - pidValue.left;
         newSpeed.right = INIT_SPEED - pidValue.right;
 
