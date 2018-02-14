@@ -59,7 +59,7 @@ float rightDis() {
     for (int dacVal = 0; dacVal < 160; dacVal += 4) {
         dac_ctr(27, 1, dacVal);
         freqout(1, 1, 38000);
-        init += input(2);
+        init1 += input(2);
     }
     for (int dacVal = 0; dacVal < 160; dacVal += 4) {
         dac_ctr(27, 1, dacVal);

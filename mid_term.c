@@ -51,12 +51,12 @@ const float KP = 6;
 const float KI = 4;
 const float KD = 3;
 struct floatLeftRight integral = {
-        .left = 0.
-                        .right = 0
+        .left = 0,
+        .right = 0
 };
 struct floatLeftRight lastError = {
-        .left = 0.
-                        .right = 0
+        .left = 0,
+        .right = 0
 };
 
 
@@ -103,7 +103,7 @@ int pidControllerLeft(float disChangeLeft) {
     } else {
         integral.left = integral.left + error;
     }
-    derivative = error - lastError.left;
+    float derivative = error - lastError.left;
     lastError.left = error;
     printf("ERROR: %f, INTEGRAL: %f, DERIVATIVE: %f\n", error, integral.left, derivative);
     return round(error * KP + integral.left * KI + derivative * KD);
@@ -117,7 +117,7 @@ int pidControllerRight(float disChangeRight) {
     } else {
         integral.right = integral.right + error;
     }
-    derivative = error - lastError.right;
+    float derivative = error - lastError.right;
     lastError.right = error;
     printf("ERROR: %f, INTEGRAL: %f, DERIVATIVE: %f\n", error, integral.right, derivative);
     return round(error * KP + integral.right * KI + derivative * KD);
