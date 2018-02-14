@@ -62,49 +62,125 @@ void updateLog() {
     logCounter++;
 }
 
+void P_controller(int leftDisChange,int rightDisChange, int initial_speed, float P_value, int tolerance){
+    if (leftDisChange - rightDisChange > tolerance){
+        newSpeed.left = round(initial_speed * (leftDisChange - rightDisChange) * P_value);
+        newSpeed.right = initial_speed;
+    } else if (rightDisChange - leftDisChange > tolerance){
+        newSpeed.left = initial_speed;
+        newSpeed.right = round(initial_speed * (rightDisChange - leftDisChange) * P_value);
+    } else {
+        newSpeed.left = initial_speed;
+        newSpeed.right = initial_speed;
+    }
+}
+
+//void decide_by_left(int leftDisChange){
+//    if (leftDisChange > 10) {
+//        newSpeed.left = 16;
+//        newSpeed.right = 64;
+//    } else if (leftDisChange > 7){
+//        newSpeed.left = 24;
+//        newSpeed.right = 64;
+//    } else if (leftDisChange > 5) {
+//        newSpeed.left = 32;
+//        newSpeed.right = 64;
+//    } else if (leftDisChange > 3) {
+//        newSpeed.left = 40;
+//        newSpeed.right = 64;
+//    } else if (leftDisChange > 0) {  // change precision
+//        newSpeed.left = 64;
+//        newSpeed.right = 64;
+//    } else if (leftDisChange > -3) {
+//        newSpeed.left = 64;
+//        newSpeed.right = 40;
+//    } else if (leftDisChange > -5) {
+//        newSpeed.left = 64;
+//        newSpeed.right = 32;
+//    } else if (leftDisChange > -7) {
+//        newSpeed.left = 64;
+//        newSpeed.right = 24;
+//    } else if (leftDisChange > -10) {
+//        newSpeed.left = 64;
+//        newSpeed.right = 16;
+//    } else {
+//        newSpeed.left = 64;
+//        newSpeed.right = 8;
+//    }
+//}
+//
+//void decide_by_right(int rightDisChange){
+//    if (rightDisChange > 10) {
+//        newSpeed.left = 64;
+//        newSpeed.right = 16;
+//    } else if (rightDisChange > 5) {
+//        newSpeed.left = 64;
+//        newSpeed.right = 24;
+//    } else if (rightDisChange > 3) {
+//        newSpeed.left = 64;
+//        newSpeed.right = 32;
+//    } else if (rightDisChange > -3) {
+//        newSpeed.left = 64;
+//        newSpeed.right = 64;
+//    } else if (rightDisChange > -6) {
+//        newSpeed.left = 32;
+//        newSpeed.right = 64;
+//    } else if (rightDisChange > -11) {
+//        newSpeed.left = 24;
+//        newSpeed.right = 64;
+//    } else {
+//        newSpeed.left = 16;
+//        newSpeed.right = 64;
+//    }
+//}
+
+
 int main() {
     int preLeftDis = 0;
+    int preRightDis = 0;
     int newLeftDis = leftDis();
+    int newRightDis = rightDis();
 
     drive_speed(preSpeed.left, preSpeed.right);
 
     while (ping_cm(8) > 20) {
-        int needRecord = 0;
         preLeftDis = newLeftDis;
+        preRightDis = newRightDis;
         newLeftDis = leftDis();
+        newRightDis = rightDis();
+
         int leftDisChange = newLeftDis - preLeftDis;
+        int rightDisChange = newRightDis - preRightDis;
 
         printf("Change in left distance is: %d\n", leftDisChange);
+        printf("Change in right distance is: %d\n", rightDisChange);
 
-        if (leftDisChange > 10) {
-            newSpeed.left = 16;
-            newSpeed.right = 64;
-        } else if (leftDisChange > 5) {
-            newSpeed.left = 24;
-            newSpeed.right = 64;
-        } else if (leftDisChange > 3) {
-            newSpeed.left = 32;
-            newSpeed.right = 64;
-        } else if (leftDisChange > -3) {
-            newSpeed.left = 64;
-            newSpeed.right = 64;
-        } else if (leftDisChange > -6) {
-            newSpeed.left = 64;
-            newSpeed.right = 32;
-        } else if (leftDisChange > -11) {
-            newSpeed.left = 64;
-            newSpeed.right = 24;
-        } else {
-            newSpeed.left = 64;
-            newSpeed.right = 16;
-        }
+
+        P_controller(leftDisChange, rightDisChange, 64, 0.025, 1);
+
+
+//        if (newRightDis - newLeftDis > 15){
+//            P_controller(leftDisChange, rightDisChange, 64, 0.02, 0);
+//            printf(" ");
+//            printf(" ");
+//            printf("=============");
+//        } else if (newLeftDis - newRightDis > 15){
+//            P_controller(rightDisChange, leftDisChange, 64, 0.02, 0);
+//            printf(" ");
+//            printf(" ");
+//            printf("=============");
+//        } else {
+//            P_controller(leftDisChange, rightDisChange, 64, 0.08, 1);
+//        }
+
+
 
         printf("new speed is: (%d, %d)\n", newSpeed.left, newSpeed.right);
 
         if (preSpeed.left != newSpeed.left || preSpeed.right != newSpeed.right) { // need to update speed and record
             updateLog();
         }
-        pause(50);
+        pause(25);
     }
     // stop and pause to ensure that bot has fully stopped
     drive_speed(0, 0);
