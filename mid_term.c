@@ -45,13 +45,19 @@ struct IntLeftRight newSpeed = {
 };
 const int INIT_SPEED = 64;
 
+// PID parameters
 const float THRESHOLD = 1.5;
 const float KP = 6;
 const float KI = 4;
 const float KD = 3;
-float integral = 0;
-float derivative = 0;
-float lastError = 0;
+struct floatLeftRight integral = {
+        .left = 0.
+                        .right = 0
+};
+struct floatLeftRight lastError = {
+        .left = 0.
+                        .right = 0
+};
 
 
 void updateLog() {
@@ -90,17 +96,31 @@ void P_controller(int leftDisChange, int rightDisChange, int initial_speed, floa
     }
 }
 
-int pidController(float disChange) {
-    float error = disChange - 0; // desired distance change is 0
+int pidControllerLeft(float disChangeLeft) {
+    float error = disChangeLeft - 0; // desired distance change is 0
     if (abs(error) >= THRESHOLD) {
-        integral = 0;
+        integral.left = 0;
     } else {
-        integral = integral + error;
+        integral.left = integral.left + error;
     }
-    derivative = error - lastError;
-    lastError = error;
-    printf("ERROR: %f, INTEGRAL: %f, DERIVATIVE: %f\n", error, integral, derivative);
-    return round(error * KP + integral * KI + derivative * KD);
+    derivative = error - lastError.left;
+    lastError.left = error;
+    printf("ERROR: %f, INTEGRAL: %f, DERIVATIVE: %f\n", error, integral.left, derivative);
+    return round(error * KP + integral.left * KI + derivative * KD);
+}
+
+
+int pidControllerRight(float disChangeRight) {
+    float error = disChangeRight - 0; // desired distance change is 0
+    if (abs(error) >= THRESHOLD) {
+        integral.right = 0;
+    } else {
+        integral.right = integral.right + error;
+    }
+    derivative = error - lastError.right;
+    lastError.right = error;
+    printf("ERROR: %f, INTEGRAL: %f, DERIVATIVE: %f\n", error, integral.right, derivative);
+    return round(error * KP + integral.right * KI + derivative * KD);
 }
 
 void takeSpeedFromLog() {
@@ -119,34 +139,47 @@ void takeSpeedFromLog() {
 }
 
 int main() {
-    float preLeftDis = 0;
-    float preRightDis = 0;
-    float newLeftDis = leftDis();
-    float newRightDis = rightDis();
+    struct floatLeftRight preDis = {
+            .left = 0,
+            .right = 0
+    };
+    struct floatLeftRight newDis = {
+            .left = leftDis(),
+            .right = rightDis()
+    };
 
     drive_speed(preSpeed.left, preSpeed.right);
     while (ping_cm(8) > 20) {
-        preLeftDis = newLeftDis;
-        preRightDis = newRightDis;
-        newLeftDis = leftDis();
-        newRightDis = rightDis();
+        preDis.left = newDis.left;
+        preDis.right = newDis.right;
+        newDis.left = leftDis();
+        newDis.right = rightDis();
 
-        float leftDisChange = newLeftDis - preLeftDis;
-        float rightDisChange = newRightDis - preRightDis;
+        struct floatLeftRight disChange = {
+                .left =newDis.left - preDis.left,
+                .right = newDis.right - preDis.right
+        };
 
 //        printf("Change in left distance is: %d\n", leftDisChange);
 //        printf("Change in right distance is: %d\n", rightDisChange);
         //P_controller(leftDisChange, rightDisChange, 64, 0.025, 1);
+        struct IntLeftRight pidValue = {
+                .left = pidControllerLeft(disChange.left),
+                .right = pidControllerRight(disChange.right)
+        };
+        printf("Change in left distance is: %d\nPID value is: %d\n", disChange.left, pidValue.left);
+        printf("Change in right distance is: %d\nPID value is: %d\n", disChange.right, pidValue.right);
+        newSpeed.left = INIT_SPEED - pidValue.left;
+        newSpeed.right = INIT_SPEED - pidValue.right;
 
-        int pidValue = pidController(leftDisChange);
-        printf("Change in left distance is: %d\nPID value is: %d\n", leftDisChange, pidValue);
-        if (pidValue > 0) {
-            newSpeed.left = INIT_SPEED - pidValue;
-            newSpeed.right = INIT_SPEED;
-        } else {
-            newSpeed.left = INIT_SPEED;
-            newSpeed.right = INIT_SPEED + pidValue;
-        }
+//        if (pidValue > 0) {
+//            newSpeed.left = INIT_SPEED - pidValue;
+//            newSpeed.right = INIT_SPEED;
+//        } else {
+//            newSpeed.left = INIT_SPEED;
+//            newSpeed.right = INIT_SPEED + pidValue;
+//        }
+
         //printf("new speed is: (%d, %d)\n", newSpeed.left, newSpeed.right);
         if (preSpeed.left != newSpeed.left || preSpeed.right != newSpeed.right) { // need to update speed and record
             updateLog();
