@@ -46,10 +46,10 @@ struct IntLeftRight newSpeed = {
 const int INIT_SPEED = 64;
 
 // PID parameters
-const float THRESHOLD = 1.5;
-const float KP = 4;
-const float KI = 2.5;
-const float KD = 1;
+const float THRESHOLD = 2.25;
+const float KP = 3.75;
+const float KI = 2.25;
+const float KD = 0.7;
 struct floatLeftRight integral = {
         .left = 0,
         .right = 0
@@ -216,6 +216,9 @@ int main() {
     y = y * 0.325;
     double distance = sqrt(x * x + y * y);
     printf("Degree: %f radius, Distance: %f cm\n", theta, distance);
+    double fx, fy, fd;
+    simulator_getPose(&fx, &fy, &fd);
+    printf("Coordinates from log: (%f, %f)\nCoordinates from func: (%f, %f)\nDegree from func: ", x, y, fx, fy, fd);
 
     // turning
     drive_goto(-2, -2);
