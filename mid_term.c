@@ -46,10 +46,11 @@ struct IntLeftRight newSpeed = {
 const int INIT_SPEED = 64;
 
 // PID parameters
-const float THRESHOLD = 1.5;
-const float KP = 4;
-const float KI = 2.5;
-const float KD = 1;
+const float THRESHOLD = 2.25;
+const float KP = 3.75;
+const float KI = 2.25;
+const float KD = 0.7;
+
 struct floatLeftRight integral = {
         .left = 0,
         .right = 0
@@ -83,18 +84,18 @@ void updateLog() {
     logCounter++;
 }
 
-void P_controller(int leftDisChange, int rightDisChange, int initial_speed, float P_value, int tolerance) {
-    if (leftDisChange - rightDisChange > tolerance) {
-        newSpeed.left = round(initial_speed * (leftDisChange - rightDisChange) * P_value);
-        newSpeed.right = initial_speed;
-    } else if (rightDisChange - leftDisChange > tolerance) {
-        newSpeed.left = initial_speed;
-        newSpeed.right = round(initial_speed * (rightDisChange - leftDisChange) * P_value);
-    } else {
-        newSpeed.left = initial_speed;
-        newSpeed.right = initial_speed;
-    }
-}
+//void P_controller(int leftDisChange, int rightDisChange, int initial_speed, float P_value, int tolerance) {
+//    if (leftDisChange - rightDisChange > tolerance) {
+//        newSpeed.left = round(initial_speed * (leftDisChange - rightDisChange) * P_value);
+//        newSpeed.right = initial_speed;
+//    } else if (rightDisChange - leftDisChange > tolerance) {
+//        newSpeed.left = initial_speed;
+//        newSpeed.right = round(initial_speed * (rightDisChange - leftDisChange) * P_value);
+//    } else {
+//        newSpeed.left = initial_speed;
+//        newSpeed.right = initial_speed;
+//    }
+//}
 
 int pidControllerLeft(float disChangeLeft) {
     float error = disChangeLeft - 0; // desired distance change is 0
@@ -218,7 +219,8 @@ int main() {
     printf("Degree: %f radius, Distance: %f cm\n", theta, distance);
 
     // turning
-    drive_goto(-2, -2);
+    drive_goto(0, 0);
+    drive_goto(-5, -5);
     if (leftDis() >= rightDis()) {
         drive_goto(51, -51);
     } else {
