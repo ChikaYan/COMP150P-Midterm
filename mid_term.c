@@ -217,9 +217,13 @@ int main() {
     y = y * 0.325;
     double distance = sqrt(x * x + y * y);
     printf("Degree: %f radius, Distance: %f cm\n", theta, distance);
-
     // turning
-    drive_goto(-2, -2);
+
+    int dis = ping_cm(8);
+    printf("Distance from the wall is: %d\n", dis);
+    drive_goto(-8, -8);
+
+
     if (leftDis() >= rightDis()) {
         drive_goto(51, -51);
     } else {
@@ -257,4 +261,5 @@ int main() {
     while (1){
         drive_goto(128, 128);
     }
+
 }
