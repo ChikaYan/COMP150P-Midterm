@@ -47,14 +47,10 @@ const int INIT_SPEED = 64;
 
 // PID parameters
 const float THRESHOLD = 2.25;
-const float KP = 3.75;
+const float KP = 3.8;
 const float KI = 2.25;
 const float KD = 0.7;
 
-const float THRESHOLD = 2.25;
-const float KP = 3.75;
-const float KI = 2.25;
-const float KD = 0.7;
 struct floatLeftRight integral = {
         .left = 0,
         .right = 0
@@ -258,8 +254,6 @@ int main() {
             takeSpeedFromLog();
         }
     }
-    drive_speed(0, 0);
-
+    drive_goto(50, 50);
     return 0;
 }
-
