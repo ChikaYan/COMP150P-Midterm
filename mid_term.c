@@ -254,6 +254,7 @@ int main() {
             takeSpeedFromLog();
         }
     }
-    drive_goto(50, 50);
-    return 0;
+    while (1){
+        drive_goto(128, 128);
+    }
 }
