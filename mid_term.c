@@ -44,13 +44,13 @@ struct IntLeftRight newSpeed = {
         .right = 64
 };
 const int INIT_SPEED = 64;
-const int AFTER_SPEED = 80;
+const int AFTER_SPEED = 64;
 
 // PID parameters
 const float THRESHOLD = 2.25;
-const float KP = 3.8;
-const float KI = 2.3;
-const float KD = 0.7;
+const float KP = 3.75;
+const float KI = 2.45;
+const float KD = 0.65;
 
 struct floatLeftRight integral = {
         .left = 0,

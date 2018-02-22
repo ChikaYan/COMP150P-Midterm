@@ -41,12 +41,7 @@ float leftDis() {
         freqout(11, 1, 38000);
         init2 += input(10);
     }
-    for (int dacVal = 0; dacVal < 160; dacVal += 4) {
-        dac_ctr(26, 0, dacVal);
-        freqout(11, 1, 38000);
-        init3 += input(10);
-    }
-    return (init1 + init2 + init3 ) / 3.0;
+    return (init1 + init2 ) / 2.0;
 }
 
 float rightDis() {
@@ -61,12 +56,7 @@ float rightDis() {
         freqout(1, 1, 38000);
         init2 += input(2);
     }
-    for (int dacVal = 0; dacVal < 160; dacVal += 4) {
-        dac_ctr(27, 1, dacVal);
-        freqout(1, 1, 38000);
-        init3 += input(2);
-    }
-    return (init1 + init2 + init3) / 3.0;
+    return (init1 + init2) / 2.0;
 }
 
 #endif //PROJECT_BASICMOVE_H
