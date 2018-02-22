@@ -44,12 +44,12 @@ struct IntLeftRight newSpeed = {
         .right = 64
 };
 const int INIT_SPEED = 64;
-const int AFTER_SPEED = 90;
+const int AFTER_SPEED = 80;
 
 // PID parameters
 const float THRESHOLD = 2.25;
 const float KP = 3.8;
-const float KI = 2.25;
+const float KI = 2.3;
 const float KD = 0.7;
 
 struct floatLeftRight integral = {
@@ -139,9 +139,11 @@ void takeSpeedFromLog() {
         preSpeed.left = round((float) logs[logCounter].ticks.right / (float) logs[logCounter].ticks.left * AFTER_SPEED);
     }
     drive_speed(preSpeed.left, preSpeed.right);
+    //printf("Moving at (%d, %d)\n", preSpeed.left, preSpeed.right);
 }
 
 int main() {
+    //simulator_startNewSmokeTrail();
     struct floatLeftRight preDis = {
             .left = 0,
             .right = 0
