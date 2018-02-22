@@ -43,14 +43,14 @@ struct IntLeftRight newSpeed = {
         .left = 64,
         .right = 64
 };
-const int INIT_SPEED = 64;
-const int AFTER_SPEED = 64;
+const int INIT_SPEED = 72;
+const int AFTER_SPEED = 88;
 
 // PID parameters
-const float THRESHOLD = 2.25;
-const float KP = 3.75;
-const float KI = 2.45;
-const float KD = 0.65;
+const float THRESHOLD = 1.5;
+const float KP = 9.25;
+const float KI = 1.5;
+const float KD = 0;
 
 struct floatLeftRight integral = {
         .left = 0,
@@ -232,9 +232,9 @@ int main() {
 
 
     if (leftDis() >= rightDis()) {
-        drive_goto(51, -51);
+        drive_goto(52, -52);
     } else {
-        drive_goto(-51, 51);
+        drive_goto(-52, 52);
     }
 
     pause(2000);
@@ -266,7 +266,7 @@ int main() {
         }
     }
     while (1) {
-        drive_goto(128, 128);
+        drive_speed(128, 128);
     }
 
 }
