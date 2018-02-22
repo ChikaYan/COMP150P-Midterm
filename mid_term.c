@@ -44,7 +44,7 @@ struct IntLeftRight newSpeed = {
         .right = 64
 };
 const int INIT_SPEED = 72;
-const int AFTER_SPEED = 88;
+const int AFTER_SPEED = 72;
 
 // PID parameters
 const float THRESHOLD = 1.5;
@@ -127,16 +127,23 @@ int pidControllerRight(float disChangeRight) {
 
 void takeSpeedFromLog() {
     logCounter--;
+    int maxSpeed = AFTER_SPEED;
+//    if (logs[logCounter].speed.left >= logs[logCounter].speed.right) {
+//        maxSpeed = logs[logCounter].speed.left;
+//    } else {
+//        maxSpeed = logs[logCounter].speed.right;
+//    }
     if (logs[logCounter].ticks.left == logs[logCounter].ticks.right) {
-        preSpeed.right = AFTER_SPEED;
-        preSpeed.left = AFTER_SPEED;
+        preSpeed.right = maxSpeed;
+        preSpeed.left = maxSpeed;
     } else if (logs[logCounter].ticks.left < logs[logCounter].ticks.right) {
         preSpeed.right = round(
-                (float) logs[logCounter].ticks.left / (float) logs[logCounter].ticks.right * AFTER_SPEED);
-        preSpeed.left = AFTER_SPEED;
+                (float) logs[logCounter].ticks.left / (float) logs[logCounter].ticks.right * maxSpeed);
+        preSpeed.left = maxSpeed;
+
     } else {
-        preSpeed.right = AFTER_SPEED;
-        preSpeed.left = round((float) logs[logCounter].ticks.right / (float) logs[logCounter].ticks.left * AFTER_SPEED);
+        preSpeed.right = maxSpeed;
+        preSpeed.left = round((float) logs[logCounter].ticks.right / (float) logs[logCounter].ticks.left * maxSpeed);
     }
     drive_speed(preSpeed.left, preSpeed.right);
     //printf("Moving at (%d, %d)\n", preSpeed.left, preSpeed.right);
@@ -172,18 +179,10 @@ int main() {
                 .left = pidControllerLeft(disChange.left),
                 .right = pidControllerRight(disChange.right)
         };
-        printf("Change in left distance is: %f\nPID value is: %d\n", disChange.left, pidValue.left);
-        printf("Change in right distance is: %f\nPID value is: %d\n", disChange.right, pidValue.right);
+        printf("Left PID value is: %d\n", pidValue.left);
+        printf("Right PID value is: %d\n", pidValue.right);
         newSpeed.left = INIT_SPEED - pidValue.left;
         newSpeed.right = INIT_SPEED - pidValue.right;
-
-//        if (pidValue > 0) {
-//            newSpeed.left = INIT_SPEED - pidValue;
-//            newSpeed.right = INIT_SPEED;
-//        } else {
-//            newSpeed.left = INIT_SPEED;
-//            newSpeed.right = INIT_SPEED + pidValue;
-//        }
 
         //printf("new speed is: (%d, %d)\n", newSpeed.left, newSpeed.right);
         if (preSpeed.left != newSpeed.left || preSpeed.right != newSpeed.right) { // need to update speed and record
@@ -224,7 +223,7 @@ int main() {
 
     drive_goto(0, 0);
     int dis = ping_cm(8);
-    printf("Distance from the wall is: %d\n", dis);
+    //printf("Distance from to wall is: %d\n", dis);
     if (10 - dis > 0) {
         int tickNum = round((10 - dis) / 0.325);
         drive_goto(-tickNum, -tickNum);
