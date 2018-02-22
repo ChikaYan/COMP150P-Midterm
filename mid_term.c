@@ -44,7 +44,7 @@ struct IntLeftRight newSpeed = {
         .right = 64
 };
 const int INIT_SPEED = 64;
-const int AFTER_SPEED = 100;
+const int AFTER_SPEED = 90;
 
 // PID parameters
 const float THRESHOLD = 2.25;
@@ -187,7 +187,6 @@ int main() {
         if (preSpeed.left != newSpeed.left || preSpeed.right != newSpeed.right) { // need to update speed and record
             updateLog();
         }
-
     }
     // stop and pause to ensure that bot has fully stopped
     drive_speed(0, 0);
