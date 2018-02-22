@@ -44,6 +44,7 @@ struct IntLeftRight newSpeed = {
         .right = 64
 };
 const int INIT_SPEED = 64;
+const int AFTER_SPEED = 100;
 
 // PID parameters
 const float THRESHOLD = 2.25;
@@ -127,14 +128,14 @@ int pidControllerRight(float disChangeRight) {
 void takeSpeedFromLog() {
     logCounter--;
     if (logs[logCounter].ticks.left == logs[logCounter].ticks.right) {
-        preSpeed.right = INIT_SPEED;
-        preSpeed.left = INIT_SPEED;
+        preSpeed.right = AFTER_SPEED;
+        preSpeed.left = AFTER_SPEED;
     } else if (logs[logCounter].ticks.left < logs[logCounter].ticks.right) {
-        preSpeed.right = round((float) logs[logCounter].ticks.left / (float) logs[logCounter].ticks.right * INIT_SPEED);
-        preSpeed.left = INIT_SPEED;
+        preSpeed.right = round((float) logs[logCounter].ticks.left / (float) logs[logCounter].ticks.right * AFTER_SPEED);
+        preSpeed.left = AFTER_SPEED;
     } else {
-        preSpeed.right = INIT_SPEED;
-        preSpeed.left = round((float) logs[logCounter].ticks.right / (float) logs[logCounter].ticks.left * INIT_SPEED);
+        preSpeed.right = AFTER_SPEED;
+        preSpeed.left = round((float) logs[logCounter].ticks.right / (float) logs[logCounter].ticks.left * AFTER_SPEED);
     }
     drive_speed(preSpeed.left, preSpeed.right);
 }
@@ -196,7 +197,8 @@ int main() {
     double x = 0.0;
     double y = 0.0;
     double theta = 0.0;
-    double BOT_WIDTH = 32.5538;
+    double BOT_WIDTH = 32.5538;        preSpeed.left = round((float) logs[logCounter].ticks.right / (float) logs[logCounter].ticks.left * AFTER_SPEED);
+
 
     for (int i = 0; i < logCounter; i++) {
         double currentDegree = (logs[i].ticks.left - logs[i].ticks.right) / BOT_WIDTH;
@@ -219,7 +221,8 @@ int main() {
     printf("Degree: %f radius, Distance: %f cm\n", theta, distance);
 
     // turning
-    drive_goto(-2, -2);
+    drive_goto(0, 0);
+    drive_goto(-5, -5);
     if (leftDis() >= rightDis()) {
         drive_goto(51, -51);
     } else {
