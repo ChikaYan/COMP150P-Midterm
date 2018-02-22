@@ -131,7 +131,8 @@ void takeSpeedFromLog() {
         preSpeed.right = AFTER_SPEED;
         preSpeed.left = AFTER_SPEED;
     } else if (logs[logCounter].ticks.left < logs[logCounter].ticks.right) {
-        preSpeed.right = round((float) logs[logCounter].ticks.left / (float) logs[logCounter].ticks.right * AFTER_SPEED);
+        preSpeed.right = round(
+                (float) logs[logCounter].ticks.left / (float) logs[logCounter].ticks.right * AFTER_SPEED);
         preSpeed.left = AFTER_SPEED;
     } else {
         preSpeed.right = AFTER_SPEED;
@@ -186,7 +187,7 @@ int main() {
         if (preSpeed.left != newSpeed.left || preSpeed.right != newSpeed.right) { // need to update speed and record
             updateLog();
         }
-        pause(50);
+
     }
     // stop and pause to ensure that bot has fully stopped
     drive_speed(0, 0);
@@ -220,9 +221,13 @@ int main() {
     printf("Degree: %f radius, Distance: %f cm\n", theta, distance);
     // turning
 
+    drive_goto(0, 0);
     int dis = ping_cm(8);
     printf("Distance from the wall is: %d\n", dis);
-    drive_goto(-8, -8);
+    if (10 - dis > 0) {
+        int tickNum = round((10 - dis) / 0.325);
+        drive_goto(-tickNum, -tickNum);
+    }
 
 
     if (leftDis() >= rightDis()) {
@@ -259,7 +264,7 @@ int main() {
             takeSpeedFromLog();
         }
     }
-    while (1){
+    while (1) {
         drive_goto(128, 128);
     }
 
