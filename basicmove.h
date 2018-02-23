@@ -30,7 +30,7 @@ void turn(float a) {
 }
 
 float leftDis() {
-    int init1 = 0, init2 = 0, init3 = 0;
+    int init1 = 0, init2 = 0;
     for (int dacVal = 0; dacVal < 160; dacVal += 4) {
         dac_ctr(26, 0, dacVal);
         freqout(11, 1, 38000);
@@ -45,7 +45,7 @@ float leftDis() {
 }
 
 float rightDis() {
-    int init1 = 0, init2 = 0, init3 = 0;
+    int init1 = 0, init2 = 0;
     for (int dacVal = 0; dacVal < 160; dacVal += 4) {
         dac_ctr(27, 1, dacVal);
         freqout(1, 1, 38000);

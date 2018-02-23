@@ -36,14 +36,14 @@ struct IntLeftRight preTicks = {
 };
 
 struct IntLeftRight preSpeed = {
-        .left = 64,
-        .right = 64
+        .left = 72,
+        .right = 72
 };
 struct IntLeftRight newSpeed = {
-        .left = 64,
-        .right = 64
+        .left = 72,
+        .right = 72
 };
-const int INIT_SPEED = 72;
+const int INIT_SPEED = 56;
 const int AFTER_SPEED = 72;
 
 // PID parameters
@@ -150,7 +150,7 @@ void takeSpeedFromLog() {
 }
 
 int main() {
-    //simulator_startNewSmokeTrail();
+    simulator_startNewSmokeTrail();
     struct floatLeftRight preDis = {
             .left = 0,
             .right = 0
@@ -231,9 +231,9 @@ int main() {
 
 
     if (leftDis() >= rightDis()) {
-        drive_goto(52, -52);
+        drive_goto(53, -53);
     } else {
-        drive_goto(-52, 52);
+        drive_goto(-53, 53);
     }
 
     pause(2000);
