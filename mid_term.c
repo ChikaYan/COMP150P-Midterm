@@ -211,7 +211,6 @@ int main() {
             y = y + rm * sin(theta);
         } else {
             x = x + logs[i].ticks.left;
-            y = y + logs[i].ticks.right;
         }
 
     }
