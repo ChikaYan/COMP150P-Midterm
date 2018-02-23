@@ -11,6 +11,8 @@
 #include "ping.h"
 #include "basicmove.h"
 
+#define PI 3.14159265
+
 // structures
 struct IntLeftRight {
     int left;
@@ -202,22 +204,30 @@ int main() {
 
     for (int i = 0; i < logCounter; i++) {
         double currentDegree = (logs[i].ticks.left - logs[i].ticks.right) / BOT_WIDTH;
-        theta = theta + currentDegree;
-        if (theta != 0) {
+        if (theta == 0) {
+            x = x + logs[i].ticks.left;
+        }else{
             double rl = logs[i].ticks.left / theta;
             double rr = logs[i].ticks.right / theta;
             double rm = (rl + rr) / 2.0;
-            x = x + rm - rm * cos(theta);
-            y = y + rm * sin(theta);
-        } else {
-            x = x + logs[i].ticks.left;
+            if (currentDegree != 0) {
+                x = x + rm * (cos(currentDegree) - cos(theta + currentDegree));
+                y = y + rm * (sin(theta + currentDegree) - sin(currentDegree));
+            } else {
+                x = x + rm - rm * cos(theta);
+                y = y + rm * sin(theta);
+            }
         }
+        theta = theta + currentDegree;
 
     }
     x = x * 0.325;
     y = y * 0.325;
     double distance = sqrt(x * x + y * y);
-    printf("Degree: %f radius, Distance: %f cm\n", theta, distance);
+    double direction = atan(y / x);
+    printf("Degree the bot has turned: %f degrees\nDistance: %f cm\nDirection the bot moved in: %f\n",
+           theta * 180.0 / PI,
+           distance, direction * 180.0 / PI);
     // turning
 
     drive_goto(0, 0);
